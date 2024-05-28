@@ -1,22 +1,16 @@
-### Info
+# Info
 This repo should help people get the bluetooth low-energy data from their RAPT Pill devices
 
 I've tested this with one Pill on a raspberry pi 4b+ as well as a windows 10 laptop, both worked fine for collecting the data
 
 I also wanted to have my own graphs that I could look at while my fermentations are going so I added Grafana into the mix
 
-### Steps regardless of Win/RPi
+## Setup Steps (raspberry pi):
 - pip install requirements.txt so you get the same version of bleak (this might not work in future versions)
-
-### Setup Steps (raspberry pi):
 - get Grafana self hosted setup in your system - I followed this to get grafana running on my pi - https://pimylifeup.com/raspberry-pi-grafana/
 - install influxdb - https://pimylifeup.com/raspberry-pi-influxdb/
 - Set your influxdb up on grafana
 - pip install influxdb
-
-
-### Setup Steps (Win10):
-- 
 
 ### Requirements:
 - bleak
