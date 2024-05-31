@@ -8,7 +8,7 @@ from bleak.backends.device import BLEDevice
 from bleak.backends.scanner import AdvertisementData
 from struct import unpack
 from collections import namedtuple
-from datetime import datetime
+from datetime import datetime, timezone
 import traceback
 
 from influxdb.resultset import ResultSet
@@ -46,6 +46,7 @@ class InfluxDbWrapper(object):
             print("!!!! Couldn't connect to DB !!!!")
             return
         # Define the data
+        now = datetime.now(datetime.UTC)
         inf_data = [
             {
                 "measurement": "rapt_pill_metrics",
@@ -55,14 +56,14 @@ class InfluxDbWrapper(object):
                 "fields": {
                     "sessionName":pill.session_name,
                     "gravity_velocity": pill.gravity_velocity,
-                    "curr_gravity": pill.curr_gravity,
-                    "abv": pill.abv,
-                    "temperature": pill.temperature,
-                    "battery": pill.battery,
-                    "x": pill.x_accel,
-                    "y": pill.y_accel,
-                    "z": pill.z_accel,
-                    "timestamp": pill.last_event
+                    "curr_gravity": float(pill.curr_gravity),
+                    "abv": float(pill.abv),
+                    "temperature": float(pill.temperature),
+                    "battery": float(pill.battery),
+                    "x": float(pill.x_accel),
+                    "y": float(pill.y_accel),
+                    "z": float(pill.z_accel),
+                    "timestamp": int(now.timestamp() * 1e9)
                 }
             }
         ]
@@ -293,8 +294,8 @@ class RaptPill(object):
             # metrics_raw = RAPTPillMetricsV2._make( unpack(">BfHfhhhH", data[4:]))
             metrics_raw =RAPTPillMetricsV2._make(unpack(">BfHfhhhH", data[4:]))
 
-        now = datetime.now()
-        dt_string = now.strftime("%d-%m-%Y-T%H:%M:%S")
+        now = datetime.now(timezone.utc)
+        dt_string = now.strftime("%Y-%m-%dT%H:%M:%SZ")
         # print("date and time =", dt_string)
         if not self.__starting_gravity_set:
             self.starting_gravity = round(metrics_raw.gravity / 1000, 4)
@@ -360,7 +361,7 @@ async def main() -> None:
             # We set the Starting Gravity here if we had a disconnect or something like that and we need to set it again (and we don't want the abv to be wrong)
             # In general this shouldn't be set - only if a session has been lost and needs to be restarted mid session
             # TODO: maybe check the database for the first gravity of this session instead?
-            if pill_details.get("Starting Gravity", 0) != 0:
+            if pill_details.get("Get Start Gravity From Db", False):
                 # Check if this session is in the database already over the the last 10 days and check the first gravity we logged if it is
                 query = f'''
                 SELECT "curr_gravity"
@@ -376,7 +377,8 @@ async def main() -> None:
                     pill.starting_gravity = starting_gravity_in_db
                 else:                    
                     pill.starting_gravity = pill_details.get("Starting Gravity", 0)
-
+            elif pill_details.get("Starting Gravity", 0) != 0 and not pill_details.get("Get Start Gravity From Db", False):
+                pill.starting_gravity = pill_details.get("Starting Gravity", 0)
             pill.start_session()
     else:
         # fill in all the details yourself here if you don't want to use the data.json
