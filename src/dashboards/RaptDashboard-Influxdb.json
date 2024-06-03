@@ -1,0 +1,370 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_RAPTPILLS",
+      "label": "RaptPills",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "influxdb",
+      "pluginName": "InfluxDB"
+    }
+  ],
+  "__elements": {
+    "fdmot4y3zeeioa": {
+      "name": "$session",
+      "uid": "fdmot4y3zeeioa",
+      "kind": 1,
+      "model": {
+        "datasource": {
+          "type": "influxdb",
+          "uid": "${DS_RAPTPILLS}"
+        },
+        "description": "",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisBorderShow": false,
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisGridShow": true,
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "insertNulls": false,
+              "lineInterpolation": "smooth",
+              "lineStyle": {
+                "fill": "solid"
+              },
+              "lineWidth": 1,
+              "pointSize": 6,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "always",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "decimals": 3,
+            "fieldMinMax": true,
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "abv"
+              },
+              "properties": [
+                {
+                  "id": "custom.axisPlacement",
+                  "value": "right"
+                },
+                {
+                  "id": "custom.axisSoftMin",
+                  "value": 0
+                },
+                {
+                  "id": "custom.axisSoftMax"
+                },
+                {
+                  "id": "unit",
+                  "value": "abv%"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "temp"
+              },
+              "properties": [
+                {
+                  "id": "custom.axisPlacement",
+                  "value": "left"
+                },
+                {
+                  "id": "custom.axisSoftMin"
+                },
+                {
+                  "id": "custom.axisSoftMax"
+                },
+                {
+                  "id": "unit",
+                  "value": "celsius"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "current gravity"
+              },
+              "properties": [
+                {
+                  "id": "custom.axisPlacement",
+                  "value": "right"
+                },
+                {
+                  "id": "custom.axisSoftMin",
+                  "value": 0.98
+                },
+                {
+                  "id": "custom.axisSoftMax"
+                },
+                {
+                  "id": "unit",
+                  "value": "SG"
+                }
+              ]
+            }
+          ]
+        },
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "maxHeight": 600,
+            "mode": "multi",
+            "sort": "none"
+          }
+        },
+        "repeat": "session",
+        "repeatDirection": "v",
+        "targets": [
+          {
+            "alias": "$col",
+            "datasource": {
+              "type": "influxdb",
+              "uid": "admob4mm0xhq8c"
+            },
+            "groupBy": [],
+            "hide": false,
+            "measurement": "rapt_pill_metrics",
+            "orderByTime": "ASC",
+            "policy": "default",
+            "query": "SELECT \"abv\" AS \"abv\", \"temperature\" AS \"temp\", \"curr_gravity\" AS \"current gravity\"\nFROM \"rapt_pill_metrics\"\nWHERE \"sessionName\" =~ /^$session$/\nAND \"timestamp\" >= $min_time\nAND \"timestamp\" <= $max_time ",
+            "rawQuery": true,
+            "refId": "A",
+            "resultFormat": "time_series",
+            "select": [
+              [
+                {
+                  "params": [
+                    "abv"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [
+                    "abv"
+                  ],
+                  "type": "alias"
+                }
+              ],
+              [
+                {
+                  "params": [
+                    "temperature"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [
+                    "temp"
+                  ],
+                  "type": "alias"
+                }
+              ],
+              [
+                {
+                  "params": [
+                    "curr_gravity"
+                  ],
+                  "type": "field"
+                },
+                {
+                  "params": [
+                    "current gravity"
+                  ],
+                  "type": "alias"
+                }
+              ]
+            ],
+            "tags": [
+              {
+                "key": "sessionName::field",
+                "operator": "=~",
+                "value": "/^$session$/"
+              }
+            ]
+          }
+        ],
+        "title": "$session",
+        "transparent": true,
+        "type": "timeseries"
+      }
+    }
+  },
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "11.0.0"
+    },
+    {
+      "type": "datasource",
+      "id": "influxdb",
+      "name": "InfluxDB",
+      "version": "1.0.0"
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "gridPos": {
+        "h": 8,
+        "w": 19,
+        "x": 0,
+        "y": 0
+      },
+      "id": 2,
+      "libraryPanel": {
+        "uid": "fdmot4y3zeeioa",
+        "name": "$session"
+      }
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 39,
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {},
+        "datasource": {
+          "type": "influxdb",
+          "uid": "${DS_RAPTPILLS}"
+        },
+        "definition": "SELECT sessionName FROM rapt_pill_metrics",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Session",
+        "multi": true,
+        "name": "session",
+        "options": [],
+        "query": "SELECT sessionName FROM rapt_pill_metrics",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {},
+        "datasource": {
+          "type": "influxdb",
+          "uid": "${DS_RAPTPILLS}"
+        },
+        "definition": "SELECT MIN(\"timestamp\") FROM \"rapt_pill_metrics\" WHERE \"sessionName\" =~ /^$session$/\n",
+        "hide": 2,
+        "includeAll": false,
+        "multi": false,
+        "name": "min_time",
+        "options": [],
+        "query": "SELECT MIN(\"timestamp\") FROM \"rapt_pill_metrics\" WHERE \"sessionName\" =~ /^$session$/\n",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {},
+        "datasource": {
+          "type": "influxdb",
+          "uid": "${DS_RAPTPILLS}"
+        },
+        "definition": "SELECT MAX(\"timestamp\") FROM \"rapt_pill_metrics\" WHERE \"sessionName\" =~ /^$session$/\n",
+        "hide": 2,
+        "includeAll": false,
+        "multi": false,
+        "name": "max_time",
+        "options": [],
+        "query": "SELECT MAX(\"timestamp\") FROM \"rapt_pill_metrics\" WHERE \"sessionName\" =~ /^$session$/\n",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-30m",
+    "to": "now"
+  },
+  "timeRangeUpdatedDuringEditOrView": false,
+  "timepicker": {
+    "hidden": false
+  },
+  "timezone": "browser",
+  "title": "Report",
+  "uid": "ddmork86a0ydca",
+  "version": 18,
+  "weekStart": ""
+}

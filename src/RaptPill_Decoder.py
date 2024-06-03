@@ -11,7 +11,6 @@ from collections import namedtuple
 from datetime import datetime, timezone
 import traceback
 
-from influxdb.resultset import ResultSet
 
 # Taken from rapt_ble on github (https://github.com/sairon/rapt-ble/blob/main/src/rapt_ble/parser.py#L14) as well as the decode_rapt_data
 RAPTPillMetricsV1 = namedtuple(
@@ -22,9 +21,11 @@ RAPTPillMetricsV2 = namedtuple(
 )
 
 class InfluxDbWrapper(object):
-    def __init__(self, db_name:str, db_host:str, db_port:int, db_username:str, db_pwd:str):
+    def __init__(self, db_name:str, db_address:str, db_port:int, db_username:str, db_pwd:str):
+        from influxdb.resultset import ResultSet
+
         self.db_name = db_name
-        self.db_host = db_host
+        self.db_host = db_address
         self.db_port = db_port
         self.db_username = db_username
         self.db_pwd = db_pwd
@@ -46,7 +47,7 @@ class InfluxDbWrapper(object):
             print("!!!! Couldn't connect to DB !!!!")
             return
         # Define the data
-        now = datetime.now(datetime.UTC)
+        now = datetime.now(timezone.utc)
         inf_data = [
             {
                 "measurement": "rapt_pill_metrics",
@@ -71,7 +72,7 @@ class InfluxDbWrapper(object):
         # Write the data to the database
         self.client.write_points(inf_data)
 
-    def run_query(self, query:str) -> None | asyncio.Generator[ResultSet, asyncio.Any, None] | ResultSet | list[ResultSet]:
+    def run_query(self, query:str) :
         """Run a query on the database and get the results
 
         Args:
@@ -85,6 +86,73 @@ class InfluxDbWrapper(object):
             return 
 
         return self.client.query(query)
+
+class InfluxDbWrapperV2(object):
+    def __init__(self, db_bucket:str, db_address:str, db_port:int, db_org:str, db_token:str):
+        from influxdb_client import InfluxDBClient, Point, WritePrecision
+        from influxdb_client.client.write_api import SYNCHRONOUS
+
+
+        self.db_bucket = db_bucket
+        self.db_host = f"http://{db_address}"
+        self.db_port = db_port
+        self.db_org = db_org
+        self.db_token = db_token
+        try:
+
+            self.client = InfluxDBClient(url=f"{self.db_host}:{self.db_port}", token=self.db_token, org=self.db_org, )
+            self.point = Point
+            self.write_pres = WritePrecision
+            self.write_api = self.client.write_api(write_options=SYNCHRONOUS)
+            print("======== Connected to DbV2!")
+        except:
+            print(traceback.format_exc())
+            self.client = None
+    
+    def add_datapoint(self, pill:RaptPill):
+        """Add a datapoint to the database if connected
+
+        Args:
+            pill (RaptPill): pill data to add
+        """        
+        if not self.client:
+            print("!!!! Couldn't connect to DB !!!!")
+            return
+        # Define the data
+        now = datetime.now(timezone.utc)
+        point = self.point("rapt_pill_metrics") \
+            .tag("version", pill.version) \
+            .field("sessionName", pill.session_name) \
+            .field("gravity_velocity", pill.gravity_velocity) \
+            .field("curr_gravity", pill.curr_gravity) \
+            .field("abv", pill.abv) \
+            .field("temperature", pill.temperature) \
+            .field("battery", pill.battery) \
+            .field("x", pill.x_accel) \
+            .field("y", pill.y_accel) \
+            .field("z", pill.z_accel) \
+            .field("timestamp",int(now.timestamp() * 1e9)) 
+
+        # Write the data to the database
+        self.write_api.write(bucket=self.db_bucket, org=self.db_org, record=point)
+        # print("======= wrote Data to V2 Db")
+
+
+    def run_query(self, query:str) :
+        """Run a query on the database and get the results
+
+        Args:
+            query (str): query to run
+
+        Returns:
+            None | asyncio.Generator[ResultSet, asyncio.Any, None] | ResultSet | list[ResultSet]: results or None
+        """        
+        if not self.client:
+            print("!!!! Couldn't connect to DB !!!!")
+            return 
+
+        return self.client.query(query)
+
 
 class RaptPill(object):
     active_pollers = []
@@ -344,12 +412,22 @@ async def main() -> None:
         influx_details = None
         if data.get("InfluxDb Details", None):
             db_details = data.get("InfluxDb Details", None)
-            influx_details = InfluxDbWrapper(db_details.get("Database Name", None), 
-                                             db_details.get("Database Address", ""), 
-                                             db_details.get("Database Port", 8086), 
-                                             db_details.get("Database Username", ""), 
-                                             db_details.get("Database Password", ""), 
-                                             )
+            if db_details.get("Database Version",None) == 1:
+                print("======== Using influxdb V1")
+                influx_details = InfluxDbWrapper(db_details.get("DatabaseV1 Name", None), 
+                                                db_details.get("Database Address", ""), 
+                                                db_details.get("Database Port", 8086), 
+                                                db_details.get("DatabaseV1 Username", ""), 
+                                                db_details.get("DatabaseV1 Password", ""), 
+                                                )
+            elif db_details.get("Database Version", None) == 2:
+                print("======== Using Influxdb V2")
+                influx_details = InfluxDbWrapperV2(db_details.get("DatabaseV2 Bucket", None),
+                                                db_details.get("Database Address", ""), 
+                                                db_details.get("Database Port", 8086),
+                                                db_details.get("DatabaseV2 Org", ""),
+                                                db_details.get("DatabaseV2 Token", ""), 
+                                                )
         for pill_details in data.get("Sessions", []):
             # MAC addresses of your RAPT Pill(s) - in case you have more (This hasn't been actually tested but it should in theory work.)
             pill = RaptPill(pill_details.get("Session Name", "NoSessionNameSet"), 

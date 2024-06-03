@@ -5,17 +5,111 @@ I've tested this with one Pill on a raspberry pi 4b+ as well as a windows 10 lap
 
 I also wanted to have my own graphs that I could look at while my fermentations are going so I added Grafana into the mix
 
-## Setup Steps (raspberry pi):
+## Basic Setup Steps (raspberry pi):
 - pip install requirements.txt so you get the same version of bleak (this might not work in future versions)
 - get Grafana self hosted setup in your system - I followed this to get grafana running on my pi - https://pimylifeup.com/raspberry-pi-grafana/
-- install influxdb - https://pimylifeup.com/raspberry-pi-influxdb/
+- install influxdb - https://pimylifeup.com/raspberry-pi-influxdb/  - choose if you're doing influxdb or influxdb2 as the setup steps are different as is the python code you will run later
 - Set your influxdb up on grafana
-- pip install influxdb
+
+
+## influxdb V1 Setup
+- Make sure you have installed influxdb  `pip install influxdb`
+- if you have chosen to run influxdb v1 you can use the src/RaptPill_Decoder.py 
+- If you want to just run the python script and not have to do any coding - in the src folder, create a file called data.json and use the json from the data.json section below to get you started.
+
+## influxdb v2
+- Make sure you have installed influxdb-client (pip install influxdb-client)
+- If you want to just run the python script and not have to do any coding - in the src folder, create a file called data.json and put the text below in it. 
+
+## Grafana
+# Data Source connection
+Open Grafana (usually http://localhost:3000) and in menu, click connections and then data sources. Add a new data source of InfluxDb.
+
+Set the name to something (I have done it as RaptPills) and set default to on
+Query Language to InfluxQL (regardless of V1 or V2 of influxdb)
+
+HTTP:
+- url you have to literally type in http://localhost:8086
+
+If using V1:
+
+HTTP:
+- leave all options default
+
+InfluxDB Details:
+Set Database to whatever you named yours 
+set User to your user name and fill in your password
+Leave http method, min time interval and max series as default
+
+If using V2:
+HTTP:
+- Auth -> set basic auth on and fill in your username and your secret token in password
+
+InfluxDBDetails
+Database: fill in your bucket name
+user: leave blank
+password: fill in your secret token
+HTTP Method: POST
+leave min time and max series default
+
+Hit save and test and hope everything works
+
+# Dashboard Setup
+In the menu, click Dashboards and if asked to create a new/import select Import
+Navigate to the src/dashboards folder and select the json file there
+Optionally give your dashboard a name and select the data source(the one you just setup)
+Import
+
+If you have any data already you should see them in the session dropdown at the top of the dashboard or already displayed. You may see graphs that don't show data and have a "Zoom to Data" button. Click the button to show the data for that session - it seems Grafana can only show us one graph of data at a time due to how it deals with time series
+
+
+
+## data.json information
+
+Below is the json that you can use to get started
+Depending on if you are using influxdb v1 or v2 you will put the correct version number in `Database Version`
+
+If you are using influxdb v1:
+- Fill in your database name, username and password into the DatabaseV1 sections. You can leave DatabaseV2 sections empty or as default below.
+
+If you are using influxdb v2:
+- Fill in the DatabaseV2 sections with your org name, bucket and the secret token that you got when you setup the db originally. 
+
+
+```
+{
+    "InfluxDb Details":{
+        "Database Version" : 1,
+        "DatabaseV1 Name": "YourDbName",
+        "DatabaseV1 Username": "username",
+        "DatabaseV1 Password" : "password",
+        "Database Address": "localhost",
+        "Database Port": 8086,
+        "DatabaseV2 Org":"orgName",
+        "DatabaseV2 Bucket": "bucketName",
+        "DatabaseV2 Token": "SecretToken"
+    },
+    "Sessions":[
+        {
+            "Mac Address": "78:E3:6D:29:19:16",
+            "Session Name": "Example Session",
+            "Poll Interval": 120,
+            "Get Start Gravity From Db":false,
+            "Starting Gravity":0,
+            "Temp in C": true, 
+            "Log To Database" : true
+        }
+    ]
+}
+```
+
+
 
 ### Requirements:
 - bleak
 - Grafana - self hosted
 - influxdb
+Python3.7 +
 
 Thanks to:
 https://github.com/sairon/rapt-ble/blob/main/src/rapt_ble/parser.py#L14 - had a MUCH easier parsing method than I was using previously
