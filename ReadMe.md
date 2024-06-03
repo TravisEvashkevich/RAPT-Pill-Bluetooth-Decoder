@@ -21,8 +21,8 @@ I also wanted to have my own graphs that I could look at while my fermentations 
 - Make sure you have installed influxdb-client (pip install influxdb-client)
 - If you want to just run the python script and not have to do any coding - in the src folder, create a file called data.json and put the text below in it. 
 
-## Grafana
-# Data Source connection
+# Grafana
+## Data Source connection
 Open Grafana (usually http://localhost:3000) and in menu, click connections and then data sources. Add a new data source of InfluxDb.
 
 Set the name to something (I have done it as RaptPills) and set default to on
@@ -64,7 +64,7 @@ If you have any data already you should see them in the session dropdown at the 
 
 
 
-## data.json information
+# data.json information
 
 Below is the json that you can use to get started
 Depending on if you are using influxdb v1 or v2 you will put the correct version number in `Database Version`
@@ -75,6 +75,14 @@ If you are using influxdb v1:
 If you are using influxdb v2:
 - Fill in the DatabaseV2 sections with your org name, bucket and the secret token that you got when you setup the db originally. 
 
+If you are tracking only one pill, you can just update the example session below, else copy it and fill in the details for each session you would like to track.
+Mac Address: the mac address for your PILL - get this from the Rapt Portal 
+Session Name: name of the brew you are doing - better to have this be unique so it can be filtered properly in grafana
+Poll Interval: how many seconds should we poll for. Ideally if you have your BT interval set to say 5 mins, you would probably want this to be 5 mins + 10 seconds (so 310) so we should always capture events
+Get Start Gravity From Db: if set to True, this will check the DB to see if there is an existing session name in the last 10 days and try getting the first gravity it finds
+Starting Gravity: if this is not 0 and Get Start Gravity from Db is false, we will force set the starting gravity for this session to the value you set. This can be helpful if you want to force the gravity start instead of either letting the pill detect it or get it from the Db.
+Temp in C: C or F temp unit conversion
+Log To Database: generally set to true so you can track data. Can set to False if you just want to see that the data is being picked up in the output of running the script.
 
 ```
 {
@@ -108,7 +116,7 @@ If you are using influxdb v2:
 ### Requirements:
 - bleak
 - Grafana - self hosted
-- influxdb
+- influxdb (v1 or v2)
 Python3.7 +
 
 Thanks to:
