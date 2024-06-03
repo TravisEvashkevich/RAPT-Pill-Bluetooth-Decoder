@@ -39,24 +39,32 @@ HTTP:
 InfluxDB Details:
 Set Database to whatever you named yours 
 set User to your user name and fill in your password
+
 Leave http method, min time interval and max series as default
 
 If using V2:
+
 HTTP:
 - Auth -> set basic auth on and fill in your username and your secret token in password
 
 InfluxDBDetails
 Database: fill in your bucket name
+
 user: leave blank
+
 password: fill in your secret token
+
 HTTP Method: POST
+
 leave min time and max series default
 
 Hit save and test and hope everything works
 
 # Dashboard Setup
 In the menu, click Dashboards and if asked to create a new/import select Import
+
 Navigate to the src/dashboards folder and select the json file there
+
 Optionally give your dashboard a name and select the data source(the one you just setup)
 Import
 
@@ -67,6 +75,7 @@ If you have any data already you should see them in the session dropdown at the 
 # data.json information
 
 Below is the json that you can use to get started
+
 Depending on if you are using influxdb v1 or v2 you will put the correct version number in `Database Version`
 
 If you are using influxdb v1:
@@ -76,12 +85,19 @@ If you are using influxdb v2:
 - Fill in the DatabaseV2 sections with your org name, bucket and the secret token that you got when you setup the db originally. 
 
 If you are tracking only one pill, you can just update the example session below, else copy it and fill in the details for each session you would like to track.
+
 Mac Address: the mac address for your PILL - get this from the Rapt Portal 
+
 Session Name: name of the brew you are doing - better to have this be unique so it can be filtered properly in grafana
+
 Poll Interval: how many seconds should we poll for. Ideally if you have your BT interval set to say 5 mins, you would probably want this to be 5 mins + 10 seconds (so 310) so we should always capture events
+
 Get Start Gravity From Db: if set to True, this will check the DB to see if there is an existing session name in the last 10 days and try getting the first gravity it finds
+
 Starting Gravity: if this is not 0 and Get Start Gravity from Db is false, we will force set the starting gravity for this session to the value you set. This can be helpful if you want to force the gravity start instead of either letting the pill detect it or get it from the Db.
+
 Temp in C: C or F temp unit conversion
+
 Log To Database: generally set to true so you can track data. Can set to False if you just want to see that the data is being picked up in the output of running the script.
 
 ```
