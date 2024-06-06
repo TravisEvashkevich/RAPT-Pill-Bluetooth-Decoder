@@ -96,7 +96,7 @@ Get Start Gravity From Db: if set to True, this will check the DB to see if ther
 
 Starting Gravity: if this is not 0 and Get Start Gravity from Db is false, we will force set the starting gravity for this session to the value you set. This can be helpful if you want to force the gravity start instead of either letting the pill detect it or get it from the Db.
 
-Temp in C: C or F temp unit conversion
+Temp in C: C or F temp unit conversion - **NOTE**: If you want your temp in F you will need to update your dashboard override [Update Temperature unit in Grafana](https://github.com/TravisEvashkevich/RAPT-Pill-Bluetooth-Decoder/edit/main/ReadMe.md#update-temperature-unit-in-grafana)
 
 Log To Database: generally set to true so you can track data. Can set to False if you just want to see that the data is being picked up in the output of running the script.
 
@@ -127,6 +127,10 @@ Log To Database: generally set to true so you can track data. Can set to False i
 }
 ```
 
+### Update Temperature unit in Grafana:
+
+If you have set the temp unit to be F instead of C, you will need to update the dashboard in grafana by going to the dashboard, hover over a graph and hit e on your keyboard. Then in the right handside you should see an Overrides tab, click it and then look for the temp override and there is a "Standard Options: Unit" that is set to Celsius - click the x and then start typing in Fahrenheit. Select it and then make sure you click Save Library Panel at the top of the page, select your dashboard and hit save 
+<img src="images/CtoF.png">
 
 
 ### Requirements:
