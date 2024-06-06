@@ -130,6 +130,7 @@ Log To Database: generally set to true so you can track data. Can set to False i
 ### Update Temperature unit in Grafana:
 
 If you have set the temp unit to be F instead of C, you will need to update the dashboard in grafana by going to the dashboard, hover over a graph and hit e on your keyboard. Then in the right handside you should see an Overrides tab, click it and then look for the temp override and there is a "Standard Options: Unit" that is set to Celsius - click the x and then start typing in Fahrenheit. Select it and then make sure you click Save Library Panel at the top of the page, select your dashboard and hit save 
+
 <img src="images/CtoF.png">
 
 
