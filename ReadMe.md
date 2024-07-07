@@ -11,6 +11,10 @@ I also wanted to have my own graphs that I could look at while my fermentations 
 - install influxdb - https://pimylifeup.com/raspberry-pi-influxdb/  - choose if you're doing influxdb or influxdb2 as the setup steps are different as is the python code you will run later
 - Set your influxdb up on grafana
 
+If on a raspberry pi5 (at least) you might be told to create a virtual environment if you try to `pip install -r src/requirements.txt`
+If this happens, you can do `python -m venv VE_Pill` - with VE_Pill being whatever you want to call it
+You then do `source VE_Pill/bin/activate` which will activate your virtual environment. You may now do `pip install -r src/requirements.txt`
+
 
 ## influxdb V1 Setup
 - Make sure you have installed influxdb  `pip install influxdb`
@@ -19,7 +23,7 @@ I also wanted to have my own graphs that I could look at while my fermentations 
 
 ## influxdb v2
 - Make sure you have installed influxdb-client (pip install influxdb-client)
-- If you want to just run the python script and not have to do any coding - in the src folder, create a file called data.json and put the text below in it. 
+- If you want to just run the python script and not have to do any coding - in the src folder, create a file called data.json and put settings from the data.json information section inside it. 
 
 # Grafana
 ## Data Source connection
