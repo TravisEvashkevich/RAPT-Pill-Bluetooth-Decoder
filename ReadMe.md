@@ -1,4 +1,5 @@
 # Info
+<img src="images/RealDataExample.png">
 This repo should help people get the bluetooth low-energy data from their RAPT Pill devices
 
 I've tested this with one Pill on a raspberry pi 4b+ as well as a windows 10 laptop, both worked fine for collecting the data

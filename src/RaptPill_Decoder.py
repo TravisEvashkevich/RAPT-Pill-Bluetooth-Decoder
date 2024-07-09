@@ -122,6 +122,7 @@ class InfluxDbWrapperV2(object):
         now = datetime.now(timezone.utc)
         point = self.point("rapt_pill_metrics") \
             .tag("version", pill.version) \
+            .tag("sessionName", pill.session_name) \
             .field("sessionName", pill.session_name) \
             .field("gravity_velocity", pill.gravity_velocity) \
             .field("curr_gravity", pill.curr_gravity) \
@@ -151,7 +152,7 @@ class InfluxDbWrapperV2(object):
             print("!!!! Couldn't connect to DB !!!!")
             return 
 
-        return self.client.query(query)
+        return self.client.query_api().query(query=query)
 
 
 class RaptPill(object):
@@ -441,22 +442,43 @@ async def main() -> None:
             # TODO: maybe check the database for the first gravity of this session instead?
             if pill_details.get("Get Start Gravity From Db", False):
                 # Check if this session is in the database already over the the last 10 days and check the first gravity we logged if it is
-                query = f'''
-                SELECT "curr_gravity"
-                FROM "rapt_pill_metrics"
-                WHERE "sessionName" = '{pill_details.get('Session Name', '')}' AND time > now() - 10d
-                ORDER BY time ASC
-                LIMIT 1
-                '''
-                results = influx_details.run_query(query)
-                points = list(results.get_points())
-                starting_gravity_in_db = points[0].get("curr_gravity", 0)
+                starting_gravity_in_db = 0
+                if db_details.get("Database Version", None) == 1:
+                    query = f'''
+                    SELECT "curr_gravity"
+                    FROM "rapt_pill_metrics"
+                    WHERE "sessionName" = '{pill_details.get('Session Name', '')}' AND time > now() - 10d
+                    ORDER BY time ASC
+                    LIMIT 1
+                    '''
+                    results = influx_details.run_query(query)
+                    points = list(results.get_points())
+                    starting_gravity_in_db = points[0].get("curr_gravity", 0)
+
+                else:
+                    bucket = db_details.get("DatabaseV2 Bucket")
+                    session_name = pill_details.get('Session Name', '')
+                    query = f'''
+                    from(bucket: "{bucket}")
+                    |> range(start: -10d)
+                    |> filter(fn: (r) => r["_measurement"] == "rapt_pill_metrics")
+                    |> filter(fn: (r) => r["sessionName"] == "{session_name}")
+                    |> filter(fn: (r) => r["_field"] == "curr_gravity")
+                    |> sort(columns: ["_time"], desc: true)
+                    |> limit(n: 1)
+                    '''
+                    results = influx_details.run_query(query)
+                    for table in results:
+                        for record in table.records:
+                            starting_gravity_in_db = record.get_value()
+
                 if starting_gravity_in_db != 0:
                     pill.starting_gravity = starting_gravity_in_db
                 else:                    
                     pill.starting_gravity = pill_details.get("Starting Gravity", 0)
             elif pill_details.get("Starting Gravity", 0) != 0 and not pill_details.get("Get Start Gravity From Db", False):
                 pill.starting_gravity = pill_details.get("Starting Gravity", 0)
+            
             pill.start_session()
     else:
         # fill in all the details yourself here if you don't want to use the data.json

@@ -1,0 +1,798 @@
+{
+    "__inputs": [
+        {
+            "name": "DS_RAPTPILL",
+            "label": "RaptPill",
+            "description": "",
+            "type": "datasource",
+            "pluginId": "influxdb",
+            "pluginName": "InfluxDB"
+        }
+    ],
+    "__elements": {
+        "fdmot4y3zeeioa": {
+            "name": "$session",
+            "uid": "fdmot4y3zeeioa",
+            "kind": 1,
+            "model": {
+                "datasource": {
+                    "type": "influxdb",
+                    "uid": "${DS_RAPTPILL}"
+                },
+                "description": "",
+                "fieldConfig": {
+                    "defaults": {
+                        "color": {
+                            "mode": "palette-classic"
+                        },
+                        "custom": {
+                            "axisBorderShow": false,
+                            "axisCenteredZero": false,
+                            "axisColorMode": "text",
+                            "axisGridShow": true,
+                            "axisLabel": "",
+                            "axisPlacement": "auto",
+                            "barAlignment": 0,
+                            "drawStyle": "line",
+                            "fillOpacity": 0,
+                            "gradientMode": "none",
+                            "hideFrom": {
+                                "legend": false,
+                                "tooltip": false,
+                                "viz": false
+                            },
+                            "insertNulls": false,
+                            "lineInterpolation": "smooth",
+                            "lineStyle": {
+                                "fill": "solid"
+                            },
+                            "lineWidth": 1,
+                            "pointSize": 6,
+                            "scaleDistribution": {
+                                "type": "linear"
+                            },
+                            "showPoints": "always",
+                            "spanNulls": false,
+                            "stacking": {
+                                "group": "A",
+                                "mode": "none"
+                            },
+                            "thresholdsStyle": {
+                                "mode": "off"
+                            }
+                        },
+                        "decimals": 3,
+                        "fieldMinMax": true,
+                        "mappings": [],
+                        "thresholds": {
+                            "mode": "absolute",
+                            "steps": [
+                                {
+                                    "color": "green",
+                                    "value": null
+                                },
+                                {
+                                    "color": "red",
+                                    "value": 80
+                                }
+                            ]
+                        }
+                    },
+                    "overrides": [
+                        {
+                            "matcher": {
+                                "id": "byName",
+                                "options": "abv"
+                            },
+                            "properties": [
+                                {
+                                    "id": "custom.axisPlacement",
+                                    "value": "right"
+                                },
+                                {
+                                    "id": "custom.axisSoftMin",
+                                    "value": 0
+                                },
+                                {
+                                    "id": "custom.axisSoftMax"
+                                },
+                                {
+                                    "id": "unit",
+                                    "value": "abv%"
+                                }
+                            ]
+                        },
+                        {
+                            "matcher": {
+                                "id": "byName",
+                                "options": "temp"
+                            },
+                            "properties": [
+                                {
+                                    "id": "custom.axisPlacement",
+                                    "value": "left"
+                                },
+                                {
+                                    "id": "custom.axisSoftMin"
+                                },
+                                {
+                                    "id": "custom.axisSoftMax"
+                                },
+                                {
+                                    "id": "unit",
+                                    "value": "celsius"
+                                }
+                            ]
+                        },
+                        {
+                            "matcher": {
+                                "id": "byName",
+                                "options": "current gravity"
+                            },
+                            "properties": [
+                                {
+                                    "id": "custom.axisPlacement",
+                                    "value": "right"
+                                },
+                                {
+                                    "id": "custom.axisSoftMin",
+                                    "value": 0.98
+                                },
+                                {
+                                    "id": "custom.axisSoftMax"
+                                },
+                                {
+                                    "id": "unit",
+                                    "value": "SG"
+                                },
+                                {
+                                    "id": "decimals",
+                                    "value": 4
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "options": {
+                    "legend": {
+                        "calcs": [],
+                        "displayMode": "list",
+                        "placement": "bottom",
+                        "showLegend": true
+                    },
+                    "tooltip": {
+                        "maxHeight": 600,
+                        "mode": "multi",
+                        "sort": "none"
+                    }
+                },
+                "repeat": "session",
+                "repeatDirection": "v",
+                "targets": [
+                    {
+                        "alias": "$col",
+                        "datasource": {
+                            "type": "influxdb",
+                            "uid": "admob4mm0xhq8c"
+                        },
+                        "groupBy": [],
+                        "hide": false,
+                        "measurement": "rapt_pill_metrics",
+                        "orderByTime": "ASC",
+                        "policy": "default",
+                        "query": "SELECT \"abv\" AS \"abv\", \"temperature\" AS \"temp\", \"curr_gravity\" AS \"current gravity\"\nFROM \"rapt_pill_metrics\"\nWHERE \"sessionName\" =~ /^$session$/\nAND \"timestamp\" >= $min_time\nAND \"timestamp\" <= $max_time ",
+                        "rawQuery": true,
+                        "refId": "A",
+                        "resultFormat": "time_series",
+                        "select": [
+                            [
+                                {
+                                    "params": [
+                                        "abv"
+                                    ],
+                                    "type": "field"
+                                },
+                                {
+                                    "params": [
+                                        "abv"
+                                    ],
+                                    "type": "alias"
+                                }
+                            ],
+                            [
+                                {
+                                    "params": [
+                                        "temperature"
+                                    ],
+                                    "type": "field"
+                                },
+                                {
+                                    "params": [
+                                        "temp"
+                                    ],
+                                    "type": "alias"
+                                }
+                            ],
+                            [
+                                {
+                                    "params": [
+                                        "curr_gravity"
+                                    ],
+                                    "type": "field"
+                                },
+                                {
+                                    "params": [
+                                        "current gravity"
+                                    ],
+                                    "type": "alias"
+                                }
+                            ]
+                        ],
+                        "tags": [
+                            {
+                                "key": "sessionName::field",
+                                "operator": "=~",
+                                "value": "/^$session$/"
+                            }
+                        ]
+                    }
+                ],
+                "title": "$session",
+                "transparent": true,
+                "type": "timeseries"
+            }
+        }
+    },
+    "__requires": [
+        {
+            "type": "grafana",
+            "id": "grafana",
+            "name": "Grafana",
+            "version": "11.1.0"
+        },
+        {
+            "type": "datasource",
+            "id": "influxdb",
+            "name": "InfluxDB",
+            "version": "1.0.0"
+        },
+        {
+            "type": "panel",
+            "id": "stat",
+            "name": "Stat",
+            "version": ""
+        }
+    ],
+    "annotations": {
+        "list": [
+            {
+                "builtIn": 1,
+                "datasource": {
+                    "type": "grafana",
+                    "uid": "-- Grafana --"
+                },
+                "enable": true,
+                "hide": true,
+                "iconColor": "rgba(0, 211, 255, 1)",
+                "name": "Annotations & Alerts",
+                "type": "dashboard"
+            }
+        ]
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "id": null,
+    "links": [],
+    "panels": [
+        {
+            "collapsed": false,
+            "gridPos": {
+                "h": 1,
+                "w": 24,
+                "x": 0,
+                "y": 0
+            },
+            "id": 3,
+            "panels": [],
+            "repeat": "session",
+            "repeatDirection": "h",
+            "title": "HUD",
+            "type": "row"
+        },
+        {
+            "datasource": {
+                "type": "influxdb",
+                "uid": "${DS_RAPTPILL}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "decimals": 4,
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    },
+                    "unit": "SG"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 4,
+                "w": 3,
+                "x": 0,
+                "y": 1
+            },
+            "id": 4,
+            "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
+            },
+            "pluginVersion": "11.1.0",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "influxdb",
+                        "uid": "${DS_RAPTPILL}"
+                    },
+                    "query": "SELECT \"curr_gravity\" AS \"current gravity\"\nFROM \"rapt_pill_metrics\"\nWHERE \"sessionName\" =~ /^$session$/\nAND \"timestamp\" >= $min_time\nAND \"timestamp\" <= $max_time ",
+                    "rawQuery": true,
+                    "refId": "A",
+                    "resultFormat": "time_series"
+                }
+            ],
+            "title": "Current Gravity",
+            "type": "stat"
+        },
+        {
+            "datasource": {
+                "type": "influxdb",
+                "uid": "${DS_RAPTPILL}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 4,
+                "w": 2,
+                "x": 3,
+                "y": 1
+            },
+            "id": 5,
+            "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showPercentChange": false,
+                "text": {
+                    "titleSize": 4
+                },
+                "textMode": "auto",
+                "wideLayout": true
+            },
+            "pluginVersion": "11.1.0",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "influxdb",
+                        "uid": "${DS_RAPTPILL}"
+                    },
+                    "query": "SELECT \"abv\" AS \"abv\"\nFROM \"rapt_pill_metrics\"\nWHERE \"sessionName\" =~ /^$session$/\nAND \"timestamp\" >= $min_time\nAND \"timestamp\" <= $max_time ",
+                    "rawQuery": true,
+                    "refId": "A",
+                    "resultFormat": "time_series"
+                }
+            ],
+            "title": "ABV%",
+            "type": "stat"
+        },
+        {
+            "datasource": {
+                "type": "influxdb",
+                "uid": "${DS_RAPTPILL}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "decimals": 2,
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 4,
+                "w": 2,
+                "x": 5,
+                "y": 1
+            },
+            "id": 6,
+            "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
+            },
+            "pluginVersion": "11.1.0",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "influxdb",
+                        "uid": "${DS_RAPTPILL}"
+                    },
+                    "query": "SELECT \"temperature\" AS \"temp\"\nFROM \"rapt_pill_metrics\"\nWHERE \"sessionName\" =~ /^$session$/\nAND \"timestamp\" >= $min_time\nAND \"timestamp\" <= $max_time ",
+                    "rawQuery": true,
+                    "refId": "A",
+                    "resultFormat": "time_series"
+                }
+            ],
+            "title": "Temp",
+            "type": "stat"
+        },
+        {
+            "datasource": {
+                "type": "influxdb",
+                "uid": "${DS_RAPTPILL}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "decimals": 4,
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    },
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 4,
+                "w": 2,
+                "x": 7,
+                "y": 1
+            },
+            "id": 7,
+            "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
+            },
+            "pluginVersion": "11.1.0",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "influxdb",
+                        "uid": "${DS_RAPTPILL}"
+                    },
+                    "query": "SELECT \"gravity_velocity\" AS \"velocity\"\nFROM \"rapt_pill_metrics\"\nWHERE \"sessionName\" =~ /^$session$/\nAND \"timestamp\" >= $min_time\nAND \"timestamp\" <= $max_time ",
+                    "rawQuery": true,
+                    "refId": "A",
+                    "resultFormat": "time_series"
+                }
+            ],
+            "title": "Grav Vel",
+            "type": "stat"
+        },
+        {
+            "datasource": {
+                "type": "influxdb",
+                "uid": "${DS_RAPTPILL}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "percentage",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 30
+                            }
+                        ]
+                    },
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 4,
+                "w": 2,
+                "x": 9,
+                "y": 1
+            },
+            "id": 8,
+            "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
+            },
+            "pluginVersion": "11.1.0",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "influxdb",
+                        "uid": "${DS_RAPTPILL}"
+                    },
+                    "query": "SELECT \"battery\" AS \"battery\"\nFROM \"rapt_pill_metrics\"\nWHERE \"sessionName\" =~ /^$session$/\nAND \"timestamp\" >= $min_time\nAND \"timestamp\" <= $max_time ",
+                    "rawQuery": true,
+                    "refId": "A",
+                    "resultFormat": "time_series"
+                }
+            ],
+            "title": "Battery%",
+            "type": "stat"
+        },
+        {
+            "datasource": {
+                "type": "influxdb",
+                "uid": "${DS_RAPTPILL}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "decimals": 4,
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    },
+                    "unit": "SG"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 4,
+                "w": 2,
+                "x": 11,
+                "y": 1
+            },
+            "id": 9,
+            "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
+            },
+            "pluginVersion": "11.1.0",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "influxdb",
+                        "uid": "${DS_RAPTPILL}"
+                    },
+                    "query": "SELECT \"curr_gravity\" AS \"current gravity\"\nFROM \"rapt_pill_metrics\"\nWHERE \"sessionName\" =~ /^$session$/\nAND \"timestamp\" >= $min_time\nLIMIT 1",
+                    "rawQuery": true,
+                    "refId": "A",
+                    "resultFormat": "time_series"
+                }
+            ],
+            "title": "Starting Gravity",
+            "type": "stat"
+        },
+        {
+            "gridPos": {
+                "h": 8,
+                "w": 19,
+                "x": 0,
+                "y": 5
+            },
+            "id": 2,
+            "libraryPanel": {
+                "uid": "fdmot4y3zeeioa",
+                "name": "$session"
+            }
+        }
+    ],
+    "refresh": "auto",
+    "schemaVersion": 39,
+    "tags": [],
+    "templating": {
+        "list": [
+            {
+                "current": {},
+                "datasource": {
+                    "type": "influxdb",
+                    "uid": "${DS_RAPTPILL}"
+                },
+                "definition": "SELECT sessionName FROM rapt_pill_metrics",
+                "hide": 0,
+                "includeAll": true,
+                "label": "Session",
+                "multi": true,
+                "name": "session",
+                "options": [],
+                "query": "SELECT sessionName FROM rapt_pill_metrics",
+                "refresh": 1,
+                "regex": "",
+                "skipUrlSync": false,
+                "sort": 1,
+                "type": "query"
+            },
+            {
+                "current": {},
+                "datasource": {
+                    "type": "influxdb",
+                    "uid": "${DS_RAPTPILL}"
+                },
+                "definition": "SELECT MIN(\"timestamp\") FROM \"rapt_pill_metrics\" WHERE \"sessionName\" =~ /^$session$/\n",
+                "hide": 2,
+                "includeAll": false,
+                "multi": false,
+                "name": "min_time",
+                "options": [],
+                "query": "SELECT MIN(\"timestamp\") FROM \"rapt_pill_metrics\" WHERE \"sessionName\" =~ /^$session$/\n",
+                "refresh": 2,
+                "regex": "",
+                "skipUrlSync": false,
+                "sort": 0,
+                "type": "query"
+            },
+            {
+                "current": {},
+                "datasource": {
+                    "type": "influxdb",
+                    "uid": "${DS_RAPTPILL}"
+                },
+                "definition": "SELECT MAX(\"timestamp\") FROM \"rapt_pill_metrics\" WHERE \"sessionName\" =~ /^$session$/\n",
+                "hide": 2,
+                "includeAll": false,
+                "multi": false,
+                "name": "max_time",
+                "options": [],
+                "query": "SELECT MAX(\"timestamp\") FROM \"rapt_pill_metrics\" WHERE \"sessionName\" =~ /^$session$/\n",
+                "refresh": 2,
+                "regex": "",
+                "skipUrlSync": false,
+                "sort": 0,
+                "type": "query"
+            }
+        ]
+    },
+    "time": {
+        "from": "2024-07-09T03:14:02.000Z",
+        "to": "now"
+    },
+    "timepicker": {
+        "hidden": false
+    },
+    "timezone": "browser",
+    "title": "Mead Tracker",
+    "uid": "ddmork86a0ydca",
+    "version": 8,
+    "weekStart": ""
+}
