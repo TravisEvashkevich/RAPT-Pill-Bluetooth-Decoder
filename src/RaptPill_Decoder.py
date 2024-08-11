@@ -409,7 +409,6 @@ class RaptPill(object):
 
     def __repr__(self):
         return (
-            "\n"
             "Current Data: \n"
             f"Session Name: {self.__session_name} , "
             "\n"
@@ -434,8 +433,6 @@ class RaptPill(object):
             f"Z-Accel : {self.__z} , "
             "\n"
             f"Battery : {self.__battery} , "
-            "\n"
-            f"Gravity Velocity : {self.__gravity_velocity}"
         )
 
 
@@ -512,15 +509,19 @@ async def main() -> None:
                     for table in results:
                         for record in table.records:
                             starting_gravity_in_db = record.get_value()
-
+                    print(
+                        f"Got {starting_gravity_in_db} as current/starting gravity in db"
+                    )
+                # Only set the gravity if we found something. Else leave it up to the PILL to set it.
                 if starting_gravity_in_db != 0:
                     pill.starting_gravity = starting_gravity_in_db
-                else:
-                    pill.starting_gravity = pill_details.get("Starting Gravity", 0)
             elif pill_details.get("Starting Gravity", 0) != 0 and not pill_details.get(
                 "Get Start Gravity From Db", False
             ):
                 pill.starting_gravity = pill_details.get("Starting Gravity", 0)
+                print(
+                    f"Setting starting gravity: {pill.starting_gravity} - from data.json"
+                )
 
             pill.start_session()
     else:
