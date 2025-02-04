@@ -13,9 +13,7 @@ import traceback
 
 
 # Taken from rapt_ble on github (https://github.com/sairon/rapt-ble/blob/main/src/rapt_ble/parser.py#L14) as well as the decode_rapt_data
-RAPTPillMetricsV1 = namedtuple(
-    "RAPTPillMetrics", "version, mac, temperature, gravity, x, y, z, battery"
-)
+RAPTPillMetricsV1 = namedtuple("RAPTPillMetrics", "version, mac, temperature, gravity, x, y, z, battery")
 RAPTPillMetricsV2 = namedtuple(
     "RAPTPillMetrics",
     "hasGravityVel, gravityVel, temperature, gravity, x, y, z, battery",
@@ -23,9 +21,7 @@ RAPTPillMetricsV2 = namedtuple(
 
 
 class InfluxDbWrapper(object):
-    def __init__(
-        self, db_name: str, db_address: str, db_port: int, db_username: str, db_pwd: str
-    ):
+    def __init__(self, db_name: str, db_address: str, db_port: int, db_username: str, db_pwd: str):
         from influxdb.resultset import ResultSet
 
         self.db_name = db_name
@@ -98,9 +94,7 @@ class InfluxDbWrapper(object):
 
 
 class InfluxDbWrapperV2(object):
-    def __init__(
-        self, db_bucket: str, db_address: str, db_port: int, db_org: str, db_token: str
-    ):
+    def __init__(self, db_bucket: str, db_address: str, db_port: int, db_org: str, db_token: str):
         from influxdb_client import InfluxDBClient, Point, WritePrecision
         from influxdb_client.client.write_api import SYNCHRONOUS
 
@@ -483,7 +477,7 @@ async def main() -> None:
                 starting_gravity_in_db = 0
                 if db_details.get("Database Version", None) == 1:
                     query = f"""
-                    SELECT "curr_gravity"
+                    SELECT MAX("curr_gravity")
                     FROM "rapt_pill_metrics"
                     WHERE "sessionName" = '{pill_details.get('Session Name', '')}' AND time > now() - 10d
                     ORDER BY time ASC
@@ -509,9 +503,7 @@ async def main() -> None:
                     for table in results:
                         for record in table.records:
                             starting_gravity_in_db = record.get_value()
-                    print(
-                        f"Got {starting_gravity_in_db} as current/starting gravity in db"
-                    )
+                    print(f"Got {starting_gravity_in_db} as current/starting gravity in db")
                 # Only set the gravity if we found something. Else leave it up to the PILL to set it.
                 if starting_gravity_in_db != 0:
                     pill.starting_gravity = starting_gravity_in_db
@@ -519,16 +511,12 @@ async def main() -> None:
                 "Get Start Gravity From Db", False
             ):
                 pill.starting_gravity = pill_details.get("Starting Gravity", 0)
-                print(
-                    f"Setting starting gravity: {pill.starting_gravity} - from data.json"
-                )
+                print(f"Setting starting gravity: {pill.starting_gravity} - from data.json")
 
             pill.start_session()
     else:
         # fill in all the details yourself here if you don't want to use the data.json
-        influx_details = InfluxDbWrapper(
-            "Database Name", "localhost", 8086, "user", "somePassword"
-        )
+        influx_details = InfluxDbWrapper("Database Name", "localhost", 8086, "user", "somePassword")
         # MAC addresses of your RAPT Pill(s) - in case you have more (This hasn't been actually tested but it should in theory work.)
         pill = RaptPill(
             "Exmple Session Name",
