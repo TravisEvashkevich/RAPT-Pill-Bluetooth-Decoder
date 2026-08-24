@@ -2,7 +2,7 @@ from __future__ import annotations
 import asyncio
 from pathlib import Path
 import json
-from typing import Optional
+from typing import Optional, Self
 from bleak import BleakScanner
 from bleak.backends.device import BLEDevice
 from bleak.backends.scanner import AdvertisementData
@@ -18,6 +18,75 @@ RAPTPillMetricsV2 = namedtuple(
     "RAPTPillMetrics",
     "hasGravityVel, gravityVel, temperature, gravity, x, y, z, battery",
 )
+
+
+class BluetoothScannerManager:    
+    _instance = None
+    
+    def __init__(self):
+        """Create a BluetoothScanner object to actively poll for data
+
+        Args:
+            N/A
+        """
+        self.scanner = None
+        self.__pill_scan_callbacks = []
+        self.scanner_task = None
+        self.is_running = False
+    
+    @classmethod
+    async def get_instance(cls):
+        if cls._instance is None:
+            cls._instance = BluetoothScannerManager()
+            await cls._instance._initialize()
+        return cls._instance
+    
+    async def _initialize(self):
+        self.scanner = BleakScanner(detection_callback=self._on_device_found)
+        print("Initialized Bluetooth scanner")
+    
+    def register_callback(self, callback):
+        self.__pill_scan_callbacks.append(callback)
+    
+    def unregister_callback(self, callback):
+        if callback in self.__pill_scan_callbacks:
+            self.__pill_scan_callbacks.remove(callback)
+    
+    def _on_device_found(self, device: BLEDevice, advertisement_data: AdvertisementData):
+        """When a device is found, send the advertisement data to all pill callback functions so that they can check if it's relevant to them"""
+        for callback in self.__pill_scan_callbacks:
+            callback(device, advertisement_data)
+    
+    async def start_scanning(self):
+        if not self.is_running:
+            self.is_running = True
+            self.scanner_task = asyncio.create_task(self._scan_loop())
+            print("Started Bluetooth scanner")
+    
+    async def stop_scanning(self):
+        if self.is_running and len(self.__pill_scan_callbacks) == 0:
+            self.is_running = False
+            if self.scanner_task:
+                self.scanner_task.cancel()
+                try:
+                    await self.scanner_task
+                except asyncio.CancelledError:
+                    pass
+            print("Stopped Bluetooth scanner due to no active callback requests")
+    
+    async def _scan_loop(self):
+        """Persistent scanner loop - runs continuously"""
+        try:
+            await self.scanner.start()
+            while self.is_running:
+                await asyncio.sleep(1)
+        except asyncio.CancelledError:
+            pass
+        finally:
+            try:
+                await self.scanner.stop()
+            except:
+                pass
 
 
 class InfluxDbWrapper(object):
@@ -166,7 +235,6 @@ class InfluxDbWrapperV2(object):
 
 
 class RaptPill(object):
-    active_pollers = []
 
     def __init__(
         self,
@@ -218,10 +286,8 @@ class RaptPill(object):
         # When was the last event
         self.__last_event = None
 
-        # polling variables
-        self.__polling_task = None
-        self.active_pollers.append(self)
-        self.bt_scanner = None
+        # shared scanning singleton
+        self.__scanner_manager = None
 
     @property
     def starting_gravity(self) -> float:
@@ -288,27 +354,21 @@ class RaptPill(object):
     def last_event(self):
         return self.__last_event
 
-    def start_session(self):
+    async def start_session(self):
+        """Start listening for this pill's BLE advertisements from the global scanner"""
         print(f"Starting Session: {self.session_name}")
-        self.bt_scanner = BleakScanner(detection_callback=self.device_found)
-        if self.__polling_task is None:
-            self.__polling_task = asyncio.create_task(self.__poll_for_device())
+        self.__scanner_manager = await BluetoothScannerManager.get_instance()
+        self.__scanner_manager.register_callback(self.device_found)
+        await self.__scanner_manager.start_scanning()
 
     def end_session(self):
-        if self.__polling_task is not None:
-            self.__polling_task.cancel()
-            self.__polling_task = None
-            self.active_pollers.remove(self)
-            print(f"Ended Session: {self.session_name}")
+        """Stop listening for this pill's BLE advertisements and check if scanner should be stopped"""
+        if self.scanner_ma__scanner_managernager:
+            self.__scanner_manager.unregister_callback(self.device_found)
+            self.__scanner_manager.stop_scanning()
+        print(f"Ended Session: {self.session_name}")
 
-    async def __poll_for_device(self):
-        """poll for data from the Pill"""
-        while True:
-            await self.bt_scanner.start()
-            await asyncio.sleep(self.__polling_interval)
-            await self.bt_scanner.stop()
-
-    def device_found(self, device: BLEDevice, advertisement_data: AdvertisementData):
+    def device_found(self, device: BLEDevice, advertisement_data: AdvertisementData) -> Self:
         """This is fired everytime the bleakScanner finds a bluetooth device so we check if it is the macaddress of the pill we are tracking
         if it is not, then we ignore it
 
@@ -326,6 +386,7 @@ class RaptPill(object):
             return
         self.decode_rapt_data(raw_data)
         print(self)
+        return self
 
     def calculate_abv(self, current_gravity: float) -> float:
         """calculate the alchol by volume given the current gravity (we estimate it by calculating against the start gravity we have stored)
@@ -460,7 +521,7 @@ async def main() -> None:
                     db_details.get("DatabaseV2 Token", ""),
                 )
         for pill_details in data.get("Sessions", []):
-            # MAC addresses of your RAPT Pill(s) - in case you have more (This hasn't been actually tested but it should in theory work.)
+            # MAC addresses of your RAPT Pill(s) - in case you have more then 1
             pill = RaptPill(
                 pill_details.get("Session Name", "NoSessionNameSet"),
                 pill_details.get("Mac Address", None),
@@ -513,18 +574,18 @@ async def main() -> None:
                 pill.starting_gravity = pill_details.get("Starting Gravity", 0)
                 print(f"Setting starting gravity: {pill.starting_gravity} - from data.json")
 
-            pill.start_session()
+            await pill.start_session()
     else:
         # fill in all the details yourself here if you don't want to use the data.json
         influx_details = InfluxDbWrapper("Database Name", "localhost", 8086, "user", "somePassword")
-        # MAC addresses of your RAPT Pill(s) - in case you have more (This hasn't been actually tested but it should in theory work.)
+        # MAC addresses of your RAPT Pill(s) - in case you have more then 1
         pill = RaptPill(
             "Exmple Session Name",
             "78:E3:6D:29:19:16",
             120,
             influx_database_details=influx_details,
         )
-        pill.start_session()
+        await pill.start_session()
 
 
 if __name__ == "__main__":
